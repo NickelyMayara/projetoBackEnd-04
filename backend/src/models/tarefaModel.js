@@ -21,8 +21,8 @@ const Tarefa = conn.define("tarefas", {
     },
     status: {
         type: DataTypes.ENUM, //só entrar dados que eu quero, proposto em baixo "values"
-        values: ["pendente", "concluida"]
-
+        values: ["pendente", "concluida"],
+        defaultValue: "pendente"
     }
     },
     {

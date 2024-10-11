@@ -17,7 +17,7 @@ app.use(express.urlencoded({extended: true}))
 app.use(express.json())
 
 // Necessário para sincronizar os arquivos models no projeto
-conn.sync().then(() => {
+conn.sync(/*{force: true}*/).then(() => {
     console.log("Conectado!")
 }).catch((error) => console.error(error))
 
