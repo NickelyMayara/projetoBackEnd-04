@@ -13,6 +13,15 @@ const createSchema = z.object({ //validar dados inseridos no campo de tarefa
 const idSchema = z.object({ //validar id
     id: z.string().uuid({message: 'Id inválido'})
 })
+const updateSchema = z.object({ //validação de atualização para ter os valores corretos na mudança de status e dados recebidos do campo tarefa
+    tarefa: z.string()
+    .min(3, { message: "A tarefa deve conter no mínimo 3 caracteres" })
+    .max(255, { message: "A tarefa deve conter no máximo 255 caracteres" }),
+    status: z.enum(["pendente", "concluida"])
+})
+const situacaoSchema = z.object({ //validação de atualização para ter os valores corretos na mudança de status e dados recebidos do campo tarefa
+    tarefa: z.enum(["pendente", "concluida"])
+})
 
 export const create = async (req, res) => {
 
@@ -90,11 +99,45 @@ export const getTarefa = async (req, res) => {
     }
 }
 export const updateTarefa = async (req, res) => {
-    res.status(200).json("Chegou no controller")
+
+    const idValidation = idSchema.safeParse(req.params)
+    if(!idValidation.success){
+        res.status(400).json({message: idValidation.error})
+        return
+    }
+    const id = idValidation.data.id
+
+    const updateValidation = updateSchema.safeParse(req.body)
+    if(!updateValidation.success){
+        res.status(400).json({message: updateValidation.error})
+        return
+    }
+
+    const {tarefa, status} = updateValidation.data
+    const descricao = req.body.descricao || ""
+
+    const tarefaAtualizada = {
+        tarefa,
+        descricao,
+        status
+    }
+
+    try {// [número de linhas afetadas]  //valores para update: objeto, onde será modificado      
+        const [numAffectedRow] = await Tarefa.update(tarefaAtualizada, {
+            where: { id },
+        })
+        if(numAffectedRow <= 0){
+            res.status(404).json({err: "Tarefa Não Encontrada"})
+        }
+        res.status(200).json({message: "Tarefa Atualizada com Sucesso!"})
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({err: "Erro ao atualizar a tarefa"})
+    }
 }
 export const updateStatusTarefa = async (req, res) => {
+
     const idValidation = idSchema.safeParse(req.params)
-    
     if(!idValidation.success){
         res.status(400).json({message: idValidation.error})
         return
@@ -111,7 +154,7 @@ export const updateStatusTarefa = async (req, res) => {
 
         if(tarefa.status === 'pendente'){
             //att para concluída
-            await Tarefa.update({status: "concluída"}, {where: { id } })
+            await Tarefa.update({status: "concluida"}, {where: { id } })
         }
         else if(tarefa.status === 'concluida'){
             //att para pendente
@@ -130,7 +173,21 @@ export const updateStatusTarefa = async (req, res) => {
     }
 }
 export const getTarefaStatus = async (req, res) => {
-    res.status(200).json("Chegou no controller")
+
+    const situacaoValidation = situacaoSchema.safeParse(req.params)
+    if(!situacaoValidation.success){
+        res.status(400).json({err: situacaoValidation.error})
+        return
+    }
+    const { situacao } = situacaoValidation.data
+
+    try {
+        const tarefas = await Tarefa.findAll({where:{status: situacao}})
+        res.status(200).json(tarefas)
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({message: 'Erro ao Buscar Tarefas por situação'})
+    }
 }
 export const deleteTarefa = async (req, res) => {
     const idValidation = idSchema.safeParse(req.params)

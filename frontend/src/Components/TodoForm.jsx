@@ -10,7 +10,6 @@ const TodoForm = () => {
     const [loading, setLoading] = React.useState(null)
 
     const handlePost = async (event) => {
-        event.preventDefault()
         setLoading("Carregando...")
 
         try {
