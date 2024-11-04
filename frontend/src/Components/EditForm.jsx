@@ -1,22 +1,33 @@
 import React from 'react'
+import { Form, Button, Modal } from 'react-bootstrap';
 
-import { useState } from 'react';
-import { Form } from 'react-bootstrap';
-import Button from 'react-bootstrap/Button';
-import Modal from 'react-bootstrap/Modal';
+const EditForm = ({show, handleClose, tarefa}) => {
+    const ref = React.useRef() //pegar referência
 
-const EditForm = () => {
-    const [show, setShow] = useState(false);
+    React.useEffect(() => {
+        if(tarefa){
+            const form = ref
+            form.tarefa.value = tarefa.tarefa
+            form.descricao.value = tarefa.descricao
+        }
+    }, [tarefa])
 
-    const handleClose = () => setShow(false);
-    const handleShow = () => setShow(true);
+    const handleSubmit = (event) => {
+        event.preventDefault()
+
+        const form = ref
+
+    handleEdit({
+        ...tarefa,
+        tarefa: form.tarefa.value,
+        descricao: form.descricao.value
+    })}
+
+    handleClose()
+}
 
     return (
         <>
-            <Button variant="primary" onClick={handleShow}>
-                Launch demo modal
-            </Button>
-
             <Modal show={show} onHide={handleClose}>
                 <Modal.Header closeButton>
                     <Modal.Title>Modal heading</Modal.Title>
@@ -37,13 +48,12 @@ const EditForm = () => {
                     <Button variant="secondary" onClick={handleClose}>
                         Fechar
                     </Button>
-                    <Button variant="primary" onClick={handleClose}>
+                    <Button type="submit" variant="primary" onClick={handleClose}>
                         Salvar Alterações
                     </Button>
                 </Modal.Footer>
             </Modal>
         </>
     );
-}
 
 export default EditForm;

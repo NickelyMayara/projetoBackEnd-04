@@ -43,7 +43,7 @@ const TodoForm = () => {
                 value={descricao} onChange={(e) => setDescricao(e.target.value)}
                 required />
             </Form.Group>
-            <Button variant="primary" type="submit">
+            <Button variant="success" type="submit">
                 Salvar
             </Button>
             {message ? <p>{message}</p> : <p>{loading}</p>}
